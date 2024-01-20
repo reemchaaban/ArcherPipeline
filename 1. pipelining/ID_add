@@ -1,0 +1,21 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use work.archer_pkg.all;
+	
+entity ID_add is
+port ( 
+	datain1, datain2: in std_logic_vector (XLEN-1 downto 0);
+	result: out std_logic_vector (XLEN-1 downto 0));
+end ID_add;
+
+architecture behavioral of ID_add is
+begin
+    result <= std_logic_vector(to_unsigned(to_integer((unsigned(datain1))+(unsigned(datain2)), XLEN)));
+end architecture
+
+
+
+
+
+
