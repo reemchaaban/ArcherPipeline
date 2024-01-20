@@ -1,0 +1,74 @@
+--assume that branch is taken
+
+library ieee ;
+use ieee.std_logic_1164.all ;
+use ieee.numeric_std.all ;
+use work.archer_pkg.all;
+
+entity control is
+  port (
+    instruction : in std_logic_vector (XLEN-1 downto 0);
+    BranchCond : in std_logic; -- BR. COND. SATISFIED = 1; NOT SATISFIED = 0
+    --Jump : out std_logic;
+    --Lui : out std_logic;
+    --PCSrc : out std_logic;
+    --RegWrite : out std_logic;
+   -- ALUSrc1 : out std_logic;
+   -- ALUSrc2 : out std_logic;
+    ALUOp : out std_logic_vector (3 downto 0);
+    --MemWrite : out std_logic;
+    --MemRead : out std_logic;
+    --MemToReg : out std_logic
+    --Pred : out std_logic; --'1' if instructions proceed regularly, '0' if IF_Flush is asserted
+  ) ;
+end control ; 
+
+architecture arch of control is
+    signal opcode : std_logic_vector (6 downto 0);
+    signal funct3 : std_logic_vector (2 downto 0);
+    signal funct7 : std_logic_vector (6 downto 0);
+    signal branch_instr : std_logic;
+    signal jump_instr : std_logic;
+    signal IF_Flush : std_logic;
+begin
+
+  opcode <= instruction (6 downto 0);
+  funct3 <= instruction (14 downto 12);
+  funct7 <= instruction (31 downto 25);
+
+  branch_instr <= '1' when opcode = OPCODE_BRANCH else '0';
+  jump_instr <= '1' when ((opcode = OPCODE_JAL) or (opcode = OPCODE_JALR)) else '0';
+  
+
+  PCSrc <= (branch_instr and BranchCond) or jump_instr;
+
+  Jump <= jump_instr;
+
+  process (opcode, funct3, funct7) is
+  begin
+
+--    Lui <= '0';
+--   RegWrite <= '0';
+--    ALUSrc1 <= '0';
+--    ALUSrc2 <= '0';
+--    ALUOp <= (others=>'0');
+--    MemWrite <= '0';
+--    MemRead <= '0';
+--    MemToReg <= '0';
+
+    case opcode is
+
+      when OPCODE_BRANCH =>
+        ALUOp <= ALU_OP_ADD;
+        if (BranchCond = '1') then -- if branch is taken, flush the instruction
+        IF_Flush <= '1';
+
+      when others =>
+      BranchCond <= '0';
+      IF_Flush <= '0';
+        null;
+        
+    end case;
+  end process;
+
+end architecture ;
